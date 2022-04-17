@@ -50,7 +50,6 @@ static int lept_parse_literal(lept_context* c, lept_value* v) {
 }
 
 static int lept_parse_number(lept_context* c, lept_value* v) {
-    char* end;
     /* \TODO validate number */
     const char *p = c->json;
     if(*p == '-')
@@ -71,10 +70,12 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
             else
                 return LEPT_PARSE_INVALID_VALUE;
         }
-        else if(*p == 'e' || *p == 'E') {
-            p++;
-            if(*p == '+' || *p == '-') {
+        if(*p != '\0')
+        {
+            if(*p == 'e' || *p == 'E') {
                 p++;
+                if(*p == '+' || *p == '-')
+                    p++;
                 if(ISDIGIT(*p)) {
                     while(ISDIGIT(*p))
                         p++;
@@ -82,38 +83,12 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
                 else
                     return LEPT_PARSE_INVALID_VALUE;
             }
-            else if(ISDIGIT(*p))
-                while(ISDIGIT(*p))
-                    p++;
             else
-                return LEPT_PARSE_INVALID_VALUE;
-        }
-        else
-            return LEPT_PARSE_ROOT_NOT_SINGULAR;
-        if(*p != '\0') {
-            if(*p == 'e' || *p == 'E') {
-                p++;
-                if(*p == '+' || *p == '-') {
-                    p++;
-                    if(ISDIGIT(*p)) {
-                        while(ISDIGIT(*p))
-                            p++;
-                    }
-                    else
-                        return LEPT_PARSE_INVALID_VALUE;
-                }
-                else if(ISDIGIT(*p))
-                    while(ISDIGIT(*p))
-                        p++;
-                else
-                    return LEPT_PARSE_INVALID_VALUE;
-            }
-            else
-                return LEPT_PARSE_INVALID_VALUE;
+                return LEPT_PARSE_ROOT_NOT_SINGULAR;
         }
     }
     v->n = strtod(c->json, NULL);
-    if(v->n == HUGE_VAL)
+    if(v->n == HUGE_VAL || v->n == -HUGE_VAL)
         return LEPT_PARSE_NUMBER_TOO_BIG;
     c->json = p;
     v->type = LEPT_NUMBER;
