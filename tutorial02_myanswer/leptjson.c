@@ -61,7 +61,7 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
             p++;
     else
         return LEPT_PARSE_INVALID_VALUE;
-    if(*p != '\0') {
+/*     if(*p != '\0') { */
         if(*p == '.') {
             p++;
             if(ISDIGIT(*p))
@@ -70,8 +70,8 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
             else
                 return LEPT_PARSE_INVALID_VALUE;
         }
-        if(*p != '\0')
-        {
+/*         if(*p != '\0')
+        { */
             if(*p == 'e' || *p == 'E') {
                 p++;
                 if(*p == '+' || *p == '-')
@@ -83,10 +83,10 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
                 else
                     return LEPT_PARSE_INVALID_VALUE;
             }
-            else
+/*             else
                 return LEPT_PARSE_ROOT_NOT_SINGULAR;
         }
-    }
+    } */
     v->n = strtod(c->json, NULL);
     if(v->n == HUGE_VAL || v->n == -HUGE_VAL)
         return LEPT_PARSE_NUMBER_TOO_BIG;
