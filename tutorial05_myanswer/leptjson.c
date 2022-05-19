@@ -184,8 +184,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
 static int lept_parse_value(lept_context* c, lept_value* v);
 
 static int lept_parse_array(lept_context* c, lept_value* v) {
-    size_t head = c->top;
-    size_t size = 0;
+    size_t i, size = 0;
     int ret;
     EXPECT(c, '[');
     lept_parse_whitespace(c);
@@ -200,10 +199,8 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
         lept_value e;
         lept_init(&e);
         lept_parse_whitespace(c);
-        if ((ret = lept_parse_value(c, &e)) != LEPT_PARSE_OK){
-            c->top = head;
-            return ret;
-        }
+        if ((ret = lept_parse_value(c, &e)) != LEPT_PARSE_OK)
+            break;
         memcpy(lept_context_push(c, sizeof(lept_value)), &e, sizeof(lept_value));
         size++;
         lept_parse_whitespace(c);
@@ -218,10 +215,13 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
             return LEPT_PARSE_OK;
         }
         else{
-            c->top = head;
-            return LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+            ret = LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+            break;
         }
     }
+    for (i = 0; i < size; i++)
+        lept_free((lept_value*)lept_context_pop(c, sizeof(lept_value)));
+    return ret;
 }
 
 static int lept_parse_value(lept_context* c, lept_value* v) {
