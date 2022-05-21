@@ -132,10 +132,7 @@ static int lept_parse_string_raw(lept_context* c, char** str, size_t* len) {
     size_t head = c->top;
     unsigned u, u2;
     const char* p;
-    if(*c->json == '\"')
-        c->json++;
-    else
-        STRING_ERROR(LEPT_PARSE_MISS_KEY);
+    EXPECT(c, '\"');
     p = c->json;
     for (;;) {
         char ch = *p++;
@@ -259,7 +256,10 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
     for (;;) {
         lept_init(&m.v);
         /* \todo parse key to m.k, m.klen */
-        lept_parse_whitespace(c);
+        if (*c->json != '"') {
+            ret = LEPT_PARSE_MISS_KEY;
+            break;
+        }
         if ((ret = lept_parse_string_raw(c, &s, &m.klen)) != LEPT_PARSE_OK)
             break;
         m.k = (char*)malloc(m.klen + 1);
@@ -307,6 +307,7 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
         free(temp->k);
         lept_free(&temp->v);
     }
+    v->type = LEPT_NULL;
     return ret;
 }
 
